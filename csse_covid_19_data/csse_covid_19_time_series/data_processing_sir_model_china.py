@@ -5,15 +5,18 @@ from matplotlib.font_manager import FontProperties
 import csv
 
 # Total population, N.
-N = 82000
+# N = 82000
+N = 22000
 # Initial number of infected and recovered individuals, I0 and R0.
-I0, R0 = 547, 0
+# I0, R0 = 547, 0
+I0, R0 = 20, 0
 # Everyone else, S0, is susceptible to infection initially.
 S0 = N - I0 - R0
 # Contact rate, beta, and mean recovery rate, gamma, (in 1/days).
-beta, gamma = 0.3, 0.025
+# beta, gamma = 0.3, 0.025
+beta, gamma = 0.247, 0.025
 # A grid of time points (in days)
-t = np.linspace(0, 50)
+t = np.linspace(0, 60)
 
 # The SIR model differential equations.
 def deriv(y, t, N, beta, gamma):
@@ -44,11 +47,9 @@ for spine in ('top', 'right', 'bottom', 'left'):
     ax.spines[spine].set_visible(False)
 
 # Confirmed cases
-start_day = 4
-end_day = 50
-
-def process_dataset(dataset, country):
-    res = [0 for i in range(end_day-start_day)]
+bias = 4
+def process_dataset(dataset, country, start_day, end_day):
+    res = [0 for i in range(end_day-start_day-bias)]
     with open('time_series_19-covid-{}.csv'.format(dataset), 'r') as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
         line_count = 0
@@ -58,18 +59,34 @@ def process_dataset(dataset, country):
                 line_count += 1
                 continue
             if row[1] == country:
-                for i in range(start_day, end_day):
-                    res[i-start_day] += int(row[i])
+                for i in range(bias+start_day, end_day):
+                    res[i-bias-start_day] += int(row[i])
     return np.array(res)
 
-confirmed_china = process_dataset("Confirmed", "Mainland China")
-deaths_china = process_dataset("Deaths", "Mainland China")
-recovered_china = process_dataset("Recovered", "Mainland China")
+
+def process_china():
+    start_day = 0
+    end_day = 50
+    confirmed = process_dataset("Confirmed", "Mainland China", start_day, end_day)
+    deaths = process_dataset("Deaths", "Mainland China", start_day, end_day)
+    recovered = process_dataset("Recovered", "Mainland China", start_day, end_day)
+    return confirmed, deaths, recovered, start_day, end_day
+
+def process_italy():
+    start_day = 23
+    end_day = 50
+    confirmed = process_dataset("Confirmed", "Italy", start_day, end_day)
+    deaths = process_dataset("Deaths", "Italy", start_day, end_day)
+    recovered = process_dataset("Recovered", "Italy", start_day, end_day)
+    return confirmed, deaths, recovered, start_day, end_day
+
+confirmed, deaths, recovered, start_day, end_day = process_china()
+
 
 # Add China data
-t = np.linspace(0, end_day-start_day, end_day-start_day)
-plt.scatter(t, confirmed_china, c='b', label='Confirmed (Actual)')
-plt.scatter(t, confirmed_china-deaths_china-recovered_china, c='r', label='Currently sick (Actual)')
+t = np.linspace(0, end_day-start_day, end_day-start_day-bias)
+plt.scatter(t, confirmed, c='b', label='Confirmed (Actual)')
+plt.scatter(t, confirmed-deaths-recovered, c='r', label='Currently sick (Actual)')
 
 fontP = FontProperties()
 fontP.set_size('small')
@@ -77,5 +94,5 @@ legend = ax.legend(loc="upper left", prop=fontP)
 legend.get_frame().set_alpha(0.5)
 
 
-plt.title("COVID-19 SIR model in Mainland China")
+plt.title("COVID-19 SIR model in Italy")
 plt.show()
