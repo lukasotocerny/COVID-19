@@ -5,16 +5,21 @@ from matplotlib.font_manager import FontProperties
 import csv
 
 # Total population, N.
+
+# China
 # N = 82000
-N = 22000
-# Initial number of infected and recovered individuals, I0 and R0.
-# I0, R0 = 547, 0
-I0, R0 = 20, 0
-# Everyone else, S0, is susceptible to infection initially.
-S0 = N - I0 - R0
-# Contact rate, beta, and mean recovery rate, gamma, (in 1/days).
+# I0, R0 = 547, 00
+# S0 = N - I0 - R0
 # beta, gamma = 0.3, 0.025
+# country = "Mainland China"
+
+# Italy
+N = 22000
+I0, R0 = 20, 0
+S0 = N - I0 - R0
 beta, gamma = 0.247, 0.025
+country = "Italy"
+
 # A grid of time points (in days)
 t = np.linspace(0, 60)
 
@@ -61,30 +66,38 @@ def process_dataset(dataset, country, start_day, end_day):
             if row[1] == country:
                 for i in range(bias+start_day, end_day):
                     res[i-bias-start_day] += int(row[i])
-    return np.array(res)
+    dummy = 0
+    if country == "Mainland China":
+        dummy = 5
+        for i in range(dummy):
+            res.insert(0, 0)
+    return np.array(res), dummy
 
 
 def process_china():
     start_day = 0
-    end_day = 50
-    confirmed = process_dataset("Confirmed", "Mainland China", start_day, end_day)
-    deaths = process_dataset("Deaths", "Mainland China", start_day, end_day)
-    recovered = process_dataset("Recovered", "Mainland China", start_day, end_day)
-    return confirmed, deaths, recovered, start_day, end_day
+    end_day = 54
+    confirmed, _ = process_dataset("Confirmed", country, start_day, end_day)
+    deaths, _ = process_dataset("Deaths", country, start_day, end_day)
+    recovered, dummy = process_dataset("Recovered", country, start_day, end_day)
+    return confirmed, deaths, recovered, start_day, end_day, dummy
 
 def process_italy():
     start_day = 23
-    end_day = 50
-    confirmed = process_dataset("Confirmed", "Italy", start_day, end_day)
-    deaths = process_dataset("Deaths", "Italy", start_day, end_day)
-    recovered = process_dataset("Recovered", "Italy", start_day, end_day)
-    return confirmed, deaths, recovered, start_day, end_day
-
-confirmed, deaths, recovered, start_day, end_day = process_china()
+    end_day = 53
+    confirmed, _ = process_dataset("Confirmed", country, start_day, end_day)
+    deaths, _ = process_dataset("Deaths", country, start_day, end_day)
+    recovered, dummy = process_dataset("Recovered", country, start_day, end_day)
+    return confirmed, deaths, recovered, start_day, end_day, dummy
 
 
-# Add China data
-t = np.linspace(0, end_day-start_day, end_day-start_day-bias)
+if country == "Mainland China":
+    confirmed, deaths, recovered, start_day, end_day, dummy = process_china()
+elif country == "Italy":
+    confirmed, deaths, recovered, start_day, end_day, dummy = process_italy()
+
+
+t = np.linspace(0, end_day-start_day, end_day-start_day-bias+dummy)
 plt.scatter(t, confirmed, c='b', label='Confirmed (Actual)')
 plt.scatter(t, confirmed-deaths-recovered, c='r', label='Currently sick (Actual)')
 

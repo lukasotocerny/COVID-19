@@ -14,6 +14,6 @@ for dataset in datasets:
                     csv_file_out.write(';'.join(["Provice", "Country", "Lat", "Long", "Date", dataset]) + "\n")
                     line_count += 1
                     continue
-                for i in range(4, 50):
+                for i in range(4, 53):
                     csv_file_out.write(';'.join([row[0], row[1], row[2], row[3], dates[i], row[i]]) + "\n")
                 line_count += 1
