@@ -76,7 +76,7 @@ def process_dataset(dataset, country, start_day, end_day):
 
 def process_china():
     start_day = 0
-    end_day = 54
+    end_day = 55
     confirmed, _ = process_dataset("Confirmed", country, start_day, end_day)
     deaths, _ = process_dataset("Deaths", country, start_day, end_day)
     recovered, dummy = process_dataset("Recovered", country, start_day, end_day)
@@ -84,7 +84,7 @@ def process_china():
 
 def process_italy():
     start_day = 23
-    end_day = 53
+    end_day = 54
     confirmed, _ = process_dataset("Confirmed", country, start_day, end_day)
     deaths, _ = process_dataset("Deaths", country, start_day, end_day)
     recovered, dummy = process_dataset("Recovered", country, start_day, end_day)
